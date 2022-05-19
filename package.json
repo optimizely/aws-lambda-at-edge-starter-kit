@@ -5,7 +5,7 @@
   "main": "src/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -rf dist && rollup -c && cd dist && zip -r ./dist.zip ."
+    "build": "rm -rf dist && rollup -c && cp -r node_modules dist/node_modules/ && cd dist && zip -r ./dist.zip ."
   },
   "repository": {
     "type": "git",

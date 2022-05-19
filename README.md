@@ -6,6 +6,8 @@
 
 ### Starter Kit Usage
 
+0. Setup a basic CloudFront and AWS Lambda@Edge connection by following [this tutorial from AWS](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-edge-how-it-works-tutorial.html).
+
 1. Clone this starter kit and run `npm install`.
 
 2. Update the `YOUR_SDK_KEY_HERE` and `YOUR_FLAG_HERE` values in `src/main.js` to the respective values from your Optimizely dashboard.
@@ -17,6 +19,12 @@
 5. Run `npm run build` - notice that a `/dist` folder is generated.
 
 6. Use the generated `bundle.js` file if using Lambda Layers with node_modules pre-installed in the environment. Otherwise, import the `dist.zip` file to Lambda and use that. (TODO: Update this bullet point with correct information after finished with starter kit.)
+
+> AWS CLI: You can use the AWS CLI ([Install Here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)), to update your AWS Lambda function using the `update-function-code` command like so: `aws lambda update-function-code --function-name my-aws-lambda-at-edge-function --zip-file fileb://dist.zip`.
+
+> Lambda Layers: You can also provision Lambda Layers (TODO: Update docs regarding Lambda Layers)
+
+Note: CloudFront triggers are associated with only one specific version of your Lambda function. Remember to update the CloudFront trigger assignment as needed when pushing new versions of your Lambda function.
 
 ---
 
