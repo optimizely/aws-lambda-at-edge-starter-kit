@@ -1,0 +1,34 @@
+{
+  "name": "aws-lambda-edge-starter-kit",
+  "version": "1.0.0",
+  "description": "Optimizely Starter Kit for running edge compute experiments on AWS Lambda@Edge.",
+  "main": "src/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -rf dist && rollup -c && cd dist && zip -r ./dist.zip ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/optimizely/aws-lambda-edge-starter-kit.git"
+  },
+  "keywords": [
+    "lambda",
+    "edge",
+    "aws",
+    "optimizely",
+    "ab testing",
+    "experimentation"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@optimizely/optimizely-sdk": "^4.9.1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^22.0.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "rollup": "^2.73.0",
+    "rollup-plugin-terser": "^7.0.2"
+  }
+}
