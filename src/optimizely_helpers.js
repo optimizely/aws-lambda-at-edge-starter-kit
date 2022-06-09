@@ -1,5 +1,4 @@
 const https = require('https');
-const keepAliveAgent = new https.Agent({ keepAlive: true });
 
 /**
  * generateRandomUserId - Generate a random user ID.
@@ -30,6 +29,7 @@ export function generateRandomUserId() {
 
 /**
  * getDatafileRequest - Retrieves the datafile from the Optimizely CDN and returns as a JSON object.
+ * Note: If the datafile exists in the cache, it will be returned from the cache instead.
  * @param string datafilePath - CDN path to datafile based on SDK Key.
  * @returns Promise
  */
@@ -43,7 +43,6 @@ function getDatafileRequest(datafilePath) {
       headers: {
         'Content-Type': 'application/json',
       },
-      agent: keepAliveAgent,
     };
 
     const req = https.get(options, (res) => {
@@ -72,6 +71,39 @@ function getDatafileRequest(datafilePath) {
   });
 }
 
+const DATAFILE_TTL = 3600000; // 1 Hour - TODO: Change as needed.
+let _datafile = ''; // Cache the datafile across Lambda@Edge Invocations.
+let _datafileLastFetchedTime = 0; // Note last time the datafile was fetched.
+
+/**
+ * getDatafile - Retrieves the datafile from the Optimizely CDN.
+ * @param string sdkKey
+ * @returns datafile JSON object
+ */
+export async function getDatafile(sdkKey) {
+  try {
+    // If the datafile is not cached, or the cache is stale, fetch the datafile.
+    if (_datafile && Date.now() - _datafileLastFetchedTime > DATAFILE_TTL) {
+      const datafileResponse = await getDatafileRequest(
+        `/datafiles/${sdkKey}.json`
+      );
+
+      if (datafileResponse.ok) {
+        _datafile = await datafileResponse.json();
+      }
+
+      _datafileLastFetchedTime = Date.now();
+    }
+
+    return _datafile;
+  } catch (error) {
+    console.error(
+      `Error getting datafile: ${error}. Try checking your SDK key.`
+    );
+    return null;
+  }
+}
+
 /**
  * postEventRequest - Posts an event to the Optimizely Logging API.
  * @param object payload
@@ -88,7 +120,6 @@ function postEventRequest(payload) {
         'Content-Type': 'application/json',
         'Content-Length': payload.length,
       },
-      agent: keepAliveAgent,
     };
 
     const req = https.post(options, (res) => {
@@ -113,27 +144,11 @@ function postEventRequest(payload) {
     });
 
     req.write(JSON.stringify(payload));
-    req.end();
+    req.end(null, null, () => {
+      console.log('Fire and forget event posted to Optimizely Logging API');
+      resolve(req);
+    });
   });
-}
-
-/**
- * getDatafile - Retrieves the datafile from the Optimizely CDN.
- * @param string sdkKey
- * @returns datafile JSON object
- */
-export async function getDatafile(sdkKey) {
-  let datafile = '';
-
-  const datafileResponse = await getDatafileRequest(
-    `/datafiles/${sdkKey}.json`
-  );
-
-  if (datafileResponse.ok) {
-    datafile = await datafileResponse.json();
-  }
-
-  return datafile;
 }
 
 /**

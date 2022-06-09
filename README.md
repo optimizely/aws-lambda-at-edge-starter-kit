@@ -6,7 +6,7 @@
 
 ### Starter Kit Usage
 
-0. Setup a basic CloudFront and AWS Lambda@Edge connection by following [this tutorial from AWS](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-edge-how-it-works-tutorial.html).
+0. Setup a basic CloudFront and AWS Lambda@Edge connection by following [this tutorial from AWS](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-edge-how-it-works-tutorial.html). Note: You can use other origins, such as a custom URL or your Lambda function's URL as the origin for your CloudFront distribution.
 
 1. Clone this starter kit and run `npm install`.
 
@@ -22,9 +22,17 @@
 
 > AWS CLI: You can use the AWS CLI ([Install Here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)), to update your AWS Lambda function using the `update-function-code` command like so: `aws lambda update-function-code --function-name my-aws-lambda-at-edge-function --zip-file fileb://dist.zip`.
 
-> Lambda Layers: You can also provision Lambda Layers (TODO: Update docs regarding Lambda Layers)
+> Lambda Layers: You may want to look into this option for more intensive Lambda environment needs.
 
-Note: CloudFront triggers are associated with only one specific version of your Lambda function. Remember to update the CloudFront trigger assignment as needed when pushing new versions of your Lambda function.
+7. After your Lambda Function is set up, ensure that you have provisioned it with Lambda@Edge permissions and associate it with your CloudFront distribution. Set the CloudFront trigger for this function to be "Viewer Request".
+
+> Note: CloudFront triggers are associated with only one specific version of your Lambda function. Remember to update the CloudFront trigger assignment as needed when pushing new versions of your Lambda function.
+
+8. An additional file, `viewer-response-lambda.js`, has also been provided. Spin up another Lambda function with Lambda@Edge permissions and associate it with the same CloudFront distribution. This time, however, the function trigger will be tied to "Viewer Response" instead. This file captures the cookie generated from the first Lambda function and provides it back to the user in the headers of the distribution's response back to the user so that they can use the cookie again later.
+
+9. From here, how you'd like to use Optimizely's experimentation features is up to you! You can modify the cookies and headers based on experimentation results, add hooks to the "Origin Request" and "Origin Response" CloudFront triggers to do things like origin redirects or dynamic asset manipulation, or add more services to the pipeline including your own logging systems, databases, CDN origins, and more.
+
+For more information or if you have questions, comments, concerns, or contributions, feel free to reach out via GitHub Issues.
 
 ---
 
