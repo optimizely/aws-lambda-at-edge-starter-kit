@@ -5,14 +5,14 @@ const https = require('https');
  * @returns string
  */
 export function generateRandomUserId() {
-  console.log('Generating random user id');
+  console.log('[OPTIMIZELY] Generating random user id...');
   var lut = [];
   for (var i = 0; i < 256; i++) {
     lut[i] = (i < 16 ? '0' : '') + i.toString(16);
   }
   var d0 = (Math.random() * 0xffffffff) | 0;
   var d1 = (Math.random() * 0xffffffff) | 0;
-  return (
+  var uuid =
     lut[d0 & 0xff] +
     lut[(d0 >> 8) & 0xff] +
     '-' +
@@ -23,8 +23,9 @@ export function generateRandomUserId() {
     lut[(d1 >> 8) & 0xff] +
     '-' +
     lut[((d1 >> 16) & 0x0f) | 0x40] +
-    lut[(d1 >> 24) & 0xff]
-  );
+    lut[(d1 >> 24) & 0xff];
+  console.log('[OPTIMIZELY] Generated User ID: ' + uuid);
+  return uuid;
 }
 
 /**
@@ -33,7 +34,8 @@ export function generateRandomUserId() {
  * @param string datafilePath - CDN path to datafile based on SDK Key.
  * @returns Promise
  */
-function getDatafileRequest(datafilePath) {
+async function getDatafileRequest(datafilePath) {
+  console.log('[OPTIMIZELY] Retrieving datafile: ' + datafilePath);
   return new Promise((resolve, reject) => {
     const options = {
       hostname: 'cdn.optimizely.com',
@@ -66,13 +68,13 @@ function getDatafileRequest(datafilePath) {
       reject(err);
     });
 
-    req.write(data);
     req.end();
   });
 }
 
-const DATAFILE_TTL = 3600000; // 1 Hour - TODO: Change as needed.
-let _datafile = ''; // Cache the datafile across Lambda@Edge Invocations.
+// const DATAFILE_TTL = 3600000; // 1 Hour - TODO: Change as needed.
+const DATAFILE_TTL = 10000; // 10 Seconds - TODO: Change as needed.
+let _datafile = null; // Cache the datafile across Lambda@Edge Invocations.
 let _datafileLastFetchedTime = 0; // Note last time the datafile was fetched.
 
 /**
@@ -81,24 +83,43 @@ let _datafileLastFetchedTime = 0; // Note last time the datafile was fetched.
  * @returns datafile JSON object
  */
 export async function getDatafile(sdkKey) {
+  console.log('[OPTIMIZELY] Getting datafile...');
   try {
+    console.log(
+      `[OPTIMIZELY] Checking if datafile is stale. Datafile Truthy: ${!!_datafile}. Current Time: ${Date.now()}. Last Fetched: ${_datafileLastFetchedTime}. TTL: ${DATAFILE_TTL}`
+    );
     // If the datafile is not cached, or the cache is stale, fetch the datafile.
-    if (_datafile && Date.now() - _datafileLastFetchedTime > DATAFILE_TTL) {
-      const datafileResponse = await getDatafileRequest(
-        `/datafiles/${sdkKey}.json`
+    if (!_datafile) {
+      console.log(
+        '[OPTIMIZELY] Cached datafile is stale, fetching new datafile...'
       );
 
-      if (datafileResponse.ok) {
-        _datafile = await datafileResponse.json();
-      }
+      _datafile = await getDatafileRequest(`/datafiles/${sdkKey}.json`);
+
+      console.log(
+        '[OPTIMIZELY] Datafile response: ' + JSON.stringify(datafile)
+      );
 
       _datafileLastFetchedTime = Date.now();
+
+      setTimeout(() => {
+        _datafile = null;
+      }, DATAFILE_TTL);
     }
+
+    console.log(
+      '[OPTIMIZELY] Datafile Last Fetched Time: ' +
+        new Date(_datafileLastFetchedTime).toLocaleTimeString()
+    );
+
+    console.log(
+      '[OPTIMIZELY] Returning datafile: ' + JSON.stringify(_datafile)
+    );
 
     return _datafile;
   } catch (error) {
     console.error(
-      `Error getting datafile: ${error}. Try checking your SDK key.`
+      `[OPTIMIZELY] Error getting datafile: ${error}. Try checking your SDK key.`
     );
     return null;
   }
@@ -110,6 +131,7 @@ export async function getDatafile(sdkKey) {
  * @returns Promise
  */
 function postEventRequest(payload) {
+  console.log('[OPTIMIZELY] Posting event: ' + JSON.stringify(payload));
   return new Promise((resolve, reject) => {
     const options = {
       hostname: 'ew.logx.optimizely.com',
@@ -145,7 +167,9 @@ function postEventRequest(payload) {
 
     req.write(JSON.stringify(payload));
     req.end(null, null, () => {
-      console.log('Fire and forget event posted to Optimizely Logging API');
+      console.log(
+        '[OPTIMIZELY] Fire and forget event posted to Optimizely Logging API'
+      );
       resolve(req);
     });
   });
