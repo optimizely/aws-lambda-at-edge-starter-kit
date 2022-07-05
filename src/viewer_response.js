@@ -5,37 +5,11 @@
  * This will capture the generated userId cookie and return it to the client.
  */
 
+import { getCookie, setHeaderCookie } from './cookies';
+
 const COOKIE_NAME_OPTIMIZELY_USER_ID = 'OPTIMIZELY_USER_ID';
 
-function getCookie(headers, cookieKey) {
-  try {
-    console.log(`[OPTIMIZELY] Getting cookie: ${cookieKey}`);
-    if (headers && headers.cookie) {
-      for (let cookieHeader of headers.cookie) {
-        const cookies = cookieHeader.value.split(';');
-        for (let cookie of cookies) {
-          const [key, val] = cookie.split('=');
-          if (key === cookieKey) {
-            console.log(`[OPTIMIZELY] Cookie "${cookieKey}" found with value of: ${val}`);
-            return val;
-          }
-        }
-      }
-    }
-    return null;
-  } catch (error) {
-    console.log('[OPTIMIZELY] Error getting cookie from headers:', error);
-    return null;
-  }
-}
-
-const setCookie = function (response, cookie) {
-  console.log(`[OPTIMIZELY] Setting cookie: ${cookie}`);
-  response.headers['set-cookie'] = response.headers['set-cookie'] || [];
-  response.headers['set-cookie'] = [{ key: 'Set-Cookie', value: cookie }];
-};
-
-exports.handler = (event, _context, callback) => {
+export function handler(event, _context, callback) {
   try {
     let request = null;
     try {
@@ -65,15 +39,24 @@ exports.handler = (event, _context, callback) => {
     }
 
     const userId = getCookie(headers, COOKIE_NAME_OPTIMIZELY_USER_ID);
+
     if (userId != null) {
-      setCookie(response, `${COOKIE_NAME_OPTIMIZELY_USER_ID}=${userId}`);
+      response.headers = setHeaderCookie(
+        headers,
+        `${COOKIE_NAME_OPTIMIZELY_USER_ID}=${userId}`
+      );
       callback(null, response);
       return;
     }
 
-    console.log(`[OPTIMIZELY]: ${COOKIE_NAME_OPTIMIZELY_USER_ID} cookie found.`);
+    console.log(
+      `[OPTIMIZELY]: ${COOKIE_NAME_OPTIMIZELY_USER_ID} cookie found.`
+    );
+
+    // Add any other parameters you'd like to carry over here.
+
     callback(null, response);
   } catch (error) {
-    console.log(`[OPTIMIZELY]: Error generating viewer response: ${error}`)
+    console.log(`[OPTIMIZELY]: Error generating viewer response: ${error}`);
   }
-};
+}

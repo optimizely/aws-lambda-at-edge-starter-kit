@@ -16,13 +16,13 @@ Note: This starter kit in particular makes use of the "Lite" version of our Java
 
 ### **External Data Fetching & Caching**
 
-This starter kit uses standard ES7 async/await fetch methods along with the built-in `https` Node.js module to handle external data fetching.
+This starter kit uses standard ES7 async/await fetch methods to handle external data fetching. After fetching the Optimizely datafile, the datafile itself is cached as a JSON object in-memory. Large datafiles may cause this method presented in the starter kit to break - if you experience issues with large datafiles breaking in-memory Lambda caching, you can consider one of the alternative methods of caching with Lambda@Edge outlined in [this article here](https://aws.amazon.com/blogs/networking-and-content-delivery/leveraging-external-data-in-lambdaedge/).
 
-After fetching the Optimizely datafile, the response is cached as a JSON object in-memory for a default time of 10 seconds. You can change this cache time as you please by adjusting the `DATAFILE_TTL` value in `optimizely_helpers.js`.
+Alternative methods to in-memory data caching include using a persistent connection to your datafile JSON, or caching via CloudFront.
 
-Extremely large datafiles that cause the Lambda function to exceed configured memory usage may cause this method presented in the starter kit to break. If you experience issues with extremely large datafiles breaking in-memory Lambda caching, you can consider one of the alternative methods of caching with Lambda@Edge outlined in [this article here](https://aws.amazon.com/blogs/networking-and-content-delivery/leveraging-external-data-in-lambdaedge/).
+For even faster data fetching, you can consider storing your datafile in an S3 bucket that you own and refactor the datafile fetching mechanism to use Lambda's built-in AWS SDK library and fetch from your S3 bucket instead.
 
-Alternative methods to in-memory data caching include using a persistent connection to your datafile JSON, caching via CloudFront, or for even faster data fetching, you can consider storing your datafile in an S3 bucket that you own and refactor the datafile fetching mechanism to use Lambda's built-in AWS SDK library and fetch from your S3 bucket instead.
+> Note: Additional caching mechanisms may be available through your CloudFront distribution's configuration.
 
 ### **Identity Management**
 
@@ -37,46 +37,51 @@ For more information on how Optimizely Full Stack SDKs bucket visitors, [click h
 # How to Use this Starter Kit
 
 > **Pre-requisites:**
-> Before you use this starter kit, it is highly recommended that you already have:
+> In order to use this starter kit, you should have:
 >
-> - A basic AWS Lambda@Edge environment including a CloudFront distribution and a Lambda function, as well as a general understanding of Lambda@Edge. [For a tutorial on how to setup a basic AWS Lambda@Edge environment and how it works, click here](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-edge-how-it-works-tutorial.html).
+> - A basic AWS Lambda@Edge setup already configured. [For a tutorial on how to setup a basic AWS Lambda@Edge environment, click here.](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-edge-how-it-works-tutorial.html).
 > - An Optimizely account. [To sign up for an Optimizely account, click here.](https://www.optimizely.com/products/intelligence/full-stack-experimentation/)
 
 1. After your Lambda@Edge environment is prepared, clone this starter kit to your local development environment and run `npm install`.
 
-2. Navigate to `src/index.js` and update the `<YOUR_SDK_KEY_HERE>` and `<YOUR_FLAG_HERE>` values to the respective values from your Optimizely dashboard.
+2. Navigate to `src/main.js` and update the `<YOUR_SDK_KEY_HERE>` and `<YOUR_FLAG_HERE>` values to the respective values from your Optimizely dashboard.
 
-   > Note: It is recommended to store your SDK Key in your Lambda environment variables instead for production. To do so, navigate to your Lambda console and select `Configuration` > `Environment variables` and click `"Edit"`. Click `"Add environment variable"` and add your SDK to a new variable with the key `OPTIMIZELY_SDK_KEY`.
+   > Note: You can **not** store environment variables with Lambda@Edge. [Read more about the limitation here](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/edge-functions-restrictions.html#lambda-requirements-lambda-function-configuration). If you'd like to inject the SDK Key into your Lambda, an alternative method is outlined in [this StackOverflow post](https://stackoverflow.com/questions/54828808/aws-lambdaedge-nodejs-environment-variables-are-not-supported) detailing how to use CloudFront Origin Custom Headers as a workaround.
 
-3. Utilize Optimizely's JavaScript Lite bundle to get decisions and log events to influence the request/response respective to where your function is being triggered.
+3. Hook into different lifecycle events by inserting logic to change headers, cookies, and more in the switch-case statement in `src/main.js`.
 
-4. Run `npm run build` - this uses Rollup to bundle the source code into a neat .zip file to be imported into Lambda.
+4. Utilize Optimizely's JavaScript Lite bundle to get decisions and log events to influence the behavior of that logic.
+
+5. Run `npm run build` - this uses Rollup to bundle the source code into a neat .zip file to be imported into Lambda.
 
    > Note: Notice that a `/dist` folder is generated with the new dist.zip file - it should be roughly ~22kb in size assuming you've changed nothing else.
 
-5. Upload your function to AWS Lambda via GUI or CLI.
+6. Upload your function to AWS Lambda via GUI or CLI.
 
-   > Navigate to your AWS Lambda console, select the function associated your Lambda@Edge environment, and import the `dist.zip` file. After you upload it, there should now be a minified `index.js` file located inside of your Lambda function's "Code Source" section.
+   > Navigate to your AWS Lambda console, select the function associated your Lambda@Edge environment, and import the `dist.zip` file. After you upload it, there should now be a minified `main.js` file located inside of your Lambda function's "Code Source" section.
 
    > **AWS CLI**: You can use the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) to update your AWS Lambda function programmatically. Example command: `aws lambda update-function-code --function-name my-aws-lambda-at-edge-function --zip-file fileb://dist.zip`.
    >
    > **Lambda Layers**: If you need additional libraries, custom runtimes, or configuration files to use alongside your Lambda function, consider looking into utilizing [Lambda Layers](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html).
 
-6. After your Lambda Function is set up, ensure that you have provisioned it with Lambda@Edge permissions and associate it with your CloudFront distribution. Set the CloudFront trigger for this function to be "Viewer Request".
+7. After your Lambda Function is set up, ensure that you have provisioned it with Lambda@Edge permissions and associate it with your CloudFront distribution. Set the CloudFront trigger for this function to be "Viewer Request".
 
    > Note: CloudFront triggers are associated with only one specific version of your Lambda function. Remember to update the CloudFront trigger assignment as needed when pushing new versions of your Lambda function. You may, for example, need to have one function that handles receiving viewer requests (viewer request trigger) and one function that handles returning a response to the viewer (viewer response trigger).
 
-7. Test your Lambda@Edge function - you should see that it returns a simple home page with the results of your feature flag test. Hooray!
+8. Test your Lambda@Edge function - you should see that it returns a simple home page with the results of your feature flag test. Hooray!
 
    > Example Endpoint: https://7qv3bw2fnoxkgy3tlhin7p7x3e0bebtk.lambda-url.us-east-1.on.aws/
 
    > For more visibility into what the starter kit is accomplishing, you can navigate to your CloudWatch console. Under `Logs` > `Log groups` > `/aws/lambda/<YOUR_LAMBDA_NAME>`, click into your Lambda's log group and view the test. You'll find the entire process of reading the headers, assigning the User ID, fetching the datafile, and making the decision all there.
 
    > Note: Also provided are:
+   >
    > 1. A slightly altered version of `index.js` - `viewer_request.js`, which is a file that outlines how to return a `request` object instead of a `response` object. You can refer to this file when designing functions that only adjust the request to your origin rather than return a response.
    > 2. `viewer_response.js`, which is a file that reads the cookie from the request headers and includes them in the return response. You can refer to this file when accommodating for retrieving a user ID generated from the viewer request hook and re-using it in the viewer response hook.
 
-8. From here, how you'd like to use Optimizely's experimentation features is up to you! You can modify the cookies and headers based on experimentation results, add hooks to the "Origin Request" and "Origin Response" CloudFront triggers to do things like origin redirects or dynamic asset manipulation, or add more services to the pipeline including your own logging systems, databases, CDN origins, and more. Keep in mind that Lambda@Edge has some limitations - you can familiarize yourself with those by referencing this article - [Edge Functions Restrictions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/edge-functions-restrictions.html).
+9. Adjust your Lambda's configuration as needed. For example, you may need to increase your function's memory, storage, and timeout threshold to accommodate your function's needs.
+
+10. From here, how you'd like to use Optimizely's experimentation features is up to you! You can modify the cookies and headers based on experimentation results, add hooks to the "Origin Request" and "Origin Response" CloudFront triggers to do things like origin redirects or dynamic asset manipulation, or add more services to the pipeline including your own logging systems, databases, CDN origins, and more. Keep in mind that Lambda@Edge has some limitations - you can familiarize yourself with those by referencing this article - [Edge Functions Restrictions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/edge-functions-restrictions.html).
 
 If you have further questions, comments, concerns, or contributions, feel free to reach out via GitHub Issues!
 
@@ -124,3 +129,4 @@ In this starter kit's case, we utilize Lambda@Edge to call to your Optimizely da
 - [CloudFront - Lambda@Edge Docs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-at-the-edge.html)
 - [CloudFront - Lambda@Edge Get Started](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-edge-how-it-works.html)
 - [Example Lambda Functions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-examples.html)
+- [Article: Lambda@Edge Gotchas and Tips](https://medium.com/@mnylen/lambda-edge-gotchas-and-tips-93083f8b4152)

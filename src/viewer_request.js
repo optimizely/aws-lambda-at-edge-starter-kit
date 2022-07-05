@@ -2,6 +2,7 @@ import {
   createInstance,
   enums as OptimizelyEnums,
 } from '@optimizely/optimizely-sdk/dist/optimizely.lite.es';
+import { getCookie, setHeaderCookie } from './cookies';
 
 import {
   dispatchEvent,
@@ -11,31 +12,7 @@ import {
 
 const COOKIE_NAME_OPTIMIZELY_USER_ID = 'OPTIMIZELY_USER_ID';
 const AWS_LAMBDA_AT_EDGE_CLIENT_ENGINE = 'javascript-sdk/aws-lambda-at-edge';
-const OPTIMIZELY_SDK_KEY =
-  process.env.OPTIMIZELY_SDK_KEY || 'Fz4H42ij5tSrayYJX8xWd'; // TODO: Replace with your SDK Key.
-
-// getCookie - Get the target cookie key value from a headers object.
-function getCookie(headers, cookieKey) {
-  try {
-    console.log(`[OPTIMIZELY] Getting cookie: ${cookieKey}`);
-    if (headers && headers.cookie) {
-      for (let cookieHeader of headers.cookie) {
-        const cookies = cookieHeader.value.split(';');
-        for (let cookie of cookies) {
-          const [key, val] = cookie.split('=');
-          if (key === cookieKey) {
-            console.log(`[OPTIMIZELY] Cookie "${cookieKey}" found with value of: ${val}`);
-            return val;
-          }
-        }
-      }
-    }
-    return null;
-  } catch (error) {
-    console.log('[OPTIMIZELY] Error getting cookie from headers:', error);
-    return null;
-  }
-}
+const OPTIMIZELY_SDK_KEY = '<YOUR_SDK_KEY_HERE>'; // TODO: Replace with your SDK Key.
 
 /**
  * === LAMBDA FUNCTION STARTING POINT ===
@@ -74,11 +51,10 @@ exports.handler = async (event, _context, callback) => {
 
     if (!userId) {
       userId = generateRandomUserId();
-      headers.cookie = headers.cookie || [];
-      headers.cookie.push({
-        key: 'Set-Cookie',
-        value: `${COOKIE_NAME_OPTIMIZELY_USER_ID}=${userId}`,
-      });
+      headers = setHeaderCookie(
+        headers,
+        `${COOKIE_NAME_OPTIMIZELY_USER_ID}=${userId}`
+      );
     }
 
     console.log(`[OPTIMIZELY] Using User ID: ${userId}`);
@@ -122,7 +98,7 @@ exports.handler = async (event, _context, callback) => {
     }
 
     // === For a Single Flag ===  //
-    const decision = optimizelyUserContext.decide('home-screen-flag'); // TODO: Replace with your flag name.
+    const decision = optimizelyUserContext.decide('<YOUR_FLAG_HERE>'); // TODO: Replace with your flag name.
     console.log(
       `[OPTIMIZELY] The Flag ${decision.flagKey} was ${decision.enabled ? 'Enabled' : 'Not Enabled'
       } for the user ${decision.userContext.getUserId()}`
@@ -152,23 +128,27 @@ exports.handler = async (event, _context, callback) => {
     // 5. Result: Return the result to the caller via appending headers or cookies to the callback function.
 
     // 5a. Cookies
-    // headers.cookie = headers.cookie || [];
-    // headers.cookie.push({
-    //   key: 'Set-Cookie',
-    //   value: `home-screen-flag-decision=${decision.enabled}`,
-    // });
+    // headers = setHeaderCookie(
+    //   headers,
+    //   `${COOKIE_NAME_OPTIMIZELY_USER_ID}=${userId}`
+    // );
 
     // 5b. Headers
-    headers['home-screen-flag-decision'] = [
-      {
-        key: 'home-screen-flag-decision',
-        value: decision.enabled,
-      },
-    ];
+    // headers['<YOUR_FLAG_HERE>-decision'] = [
+    //   {
+    //     key: '<YOUR_FLAG_HERE>-decision',
+    //     value: decision.enabled,
+    //   },
+    // ];
+
+    request = {
+      ...request,
+      headers,
+    };
 
     callback(null, request);
   } catch (error) {
-    console.error(`[OPTIMIZELY] Error running Lambda Function: ${error}`);
+    console.error(`[OPTIMIZELY] Error generating viewer request: ${error}`);
     callback(null, request);
   }
 };

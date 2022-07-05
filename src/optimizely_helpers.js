@@ -73,7 +73,7 @@ async function getDatafileRequest(datafilePath) {
 }
 
 // const DATAFILE_TTL = 3600000; // 1 Hour - TODO: Change as needed.
-const DATAFILE_TTL = 10000; // 10 Seconds - TODO: Change as needed.
+const DATAFILE_TTL = 60000; // 1 Minute - TODO: Change as needed.
 let _datafile = null; // Cache the datafile across Lambda@Edge Invocations.
 let _datafileLastFetchedTime = 0; // Note last time the datafile was fetched.
 
@@ -88,6 +88,7 @@ export async function getDatafile(sdkKey) {
     console.log(
       `[OPTIMIZELY] Checking if datafile is stale. Datafile Truthy: ${!!_datafile}. Current Time: ${Date.now()}. Last Fetched: ${_datafileLastFetchedTime}. TTL: ${DATAFILE_TTL}`
     );
+
     // If the datafile is not cached, or the cache is stale, fetch the datafile.
     if (!_datafile) {
       console.log(
@@ -97,19 +98,20 @@ export async function getDatafile(sdkKey) {
       _datafile = await getDatafileRequest(`/datafiles/${sdkKey}.json`);
 
       console.log(
-        '[OPTIMIZELY] Datafile response: ' + JSON.stringify(datafile)
+        '[OPTIMIZELY] Datafile response: ' + JSON.stringify(_datafile)
       );
 
-      _datafileLastFetchedTime = Date.now();
-
+      // Cache reset mechanism.
       setTimeout(() => {
         _datafile = null;
       }, DATAFILE_TTL);
+
+      _datafileLastFetchedTime = Date.now();
     }
 
     console.log(
       '[OPTIMIZELY] Datafile Last Fetched Time: ' +
-        new Date(_datafileLastFetchedTime).toLocaleTimeString()
+      new Date(_datafileLastFetchedTime).toLocaleTimeString()
     );
 
     console.log(
