@@ -1,5 +1,5 @@
 {
-  "name": "aws-lambda-edge-starter-kit",
+  "name": "optimizely-aws-lambda-at-edge-starter-kit",
   "version": "1.0.0",
   "description": "Optimizely Starter Kit for running edge compute experiments on AWS Lambda@Edge.",
   "main": "src/index.js",
@@ -18,6 +18,8 @@
     "aws",
     "optimizely",
     "ab testing",
+    "decisions",
+    "feature flagging",
     "experimentation"
   ],
   "author": "",

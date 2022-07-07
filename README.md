@@ -44,11 +44,11 @@ For more information on how Optimizely Full Stack SDKs bucket visitors, [click h
 
 1. After your Lambda@Edge environment is prepared, clone this starter kit to your local development environment and run `npm install`.
 
-2. Navigate to `src/main.js` and update the `<YOUR_SDK_KEY_HERE>` and `<YOUR_FLAG_HERE>` values to the respective values from your Optimizely dashboard.
+2. Navigate to `src/index.js` and update the `<YOUR_SDK_KEY_HERE>` and `<YOUR_FLAG_HERE>` values to the respective values from your Optimizely dashboard.
 
    > Note: You can **not** store environment variables with Lambda@Edge. [Read more about the limitation here](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/edge-functions-restrictions.html#lambda-requirements-lambda-function-configuration). If you'd like to inject the SDK Key into your Lambda, an alternative method is outlined in [this StackOverflow post](https://stackoverflow.com/questions/54828808/aws-lambdaedge-nodejs-environment-variables-are-not-supported) detailing how to use CloudFront Origin Custom Headers as a workaround.
 
-3. Hook into different lifecycle events by inserting logic to change headers, cookies, and more in the switch-case statement in `src/main.js`.
+3. Hook into different lifecycle events by inserting logic to change headers, cookies, and more in the switch-case statement in `src/index.js`.
 
 4. Utilize Optimizely's JavaScript Lite bundle to get decisions and log events to influence the behavior of that logic.
 
@@ -58,7 +58,7 @@ For more information on how Optimizely Full Stack SDKs bucket visitors, [click h
 
 6. Upload your function to AWS Lambda via GUI or CLI.
 
-   > Navigate to your AWS Lambda console, select the function associated your Lambda@Edge environment, and import the `dist.zip` file. After you upload it, there should now be a minified `main.js` file located inside of your Lambda function's "Code Source" section.
+   > Navigate to your AWS Lambda console, select the function associated your Lambda@Edge environment, and import the `dist.zip` file. After you upload it, there should now be a minified `index.js` file located inside of your Lambda function's "Code Source" section.
 
    > **AWS CLI**: You can use the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) to update your AWS Lambda function programmatically. Example command: `aws lambda update-function-code --function-name my-aws-lambda-at-edge-function --zip-file fileb://dist.zip`.
    >
@@ -69,8 +69,6 @@ For more information on how Optimizely Full Stack SDKs bucket visitors, [click h
    > Note: CloudFront triggers are associated with only one specific version of your Lambda function. Remember to update the CloudFront trigger assignment as needed when pushing new versions of your Lambda function. You may, for example, need to have one function that handles receiving viewer requests (viewer request trigger) and one function that handles returning a response to the viewer (viewer response trigger).
 
 8. Test your Lambda@Edge function - you should see that it returns a simple home page with the results of your feature flag test. Hooray!
-
-   > Example Endpoint: https://7qv3bw2fnoxkgy3tlhin7p7x3e0bebtk.lambda-url.us-east-1.on.aws/
 
    > For more visibility into what the starter kit is accomplishing, you can navigate to your CloudWatch console. Under `Logs` > `Log groups` > `/aws/lambda/<YOUR_LAMBDA_NAME>`, click into your Lambda's log group and view the test. You'll find the entire process of reading the headers, assigning the User ID, fetching the datafile, and making the decision all there.
 
@@ -101,7 +99,7 @@ If you have further questions, comments, concerns, or contributions, feel free t
 
 With Lambda@Edge, you can build a variety of solutions, for example:
 
-- Inspect cookies to rewrite URLs to different versions of a site for A/B testing.
+- Inspect cookies to rewrite URLs to different versions of a site for experimentation.
 
 - Send different objects to your users based on the User-Agent header, which contains information about the device that submitted the request. For example, you can send images in different resolutions to users based on their devices.
 

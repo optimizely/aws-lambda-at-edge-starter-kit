@@ -1,4 +1,8 @@
 /**
+ * Note: You may want to consider replacing cookie handling with a more robust third-party library.
+ */
+
+/**
  * getCookie - Get the target cookie key value from a headers object.
  * @param object headers
  * @param string cookieKey

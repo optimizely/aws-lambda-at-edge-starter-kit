@@ -18,9 +18,9 @@ const OPTIMIZELY_SDK_KEY = '<YOUR_SDK_KEY_HERE>'; // TODO: Replace with your SDK
  * === LAMBDA FUNCTION STARTING POINT ===
  * Handler function is called when Lambda function is invoked.
  * 1. User ID: Get the user ID from the cookie if it exists - otherwise generate a new user ID.
- * 2. Datafile: Get the datafile from the cache if it exists - otherwise populate with Optimizely CDN.
+ * 2. Datafile: Get the datafile from the cache if it exists - otherwise populate with datafile fetched from Optimizely CDN.
  * 3. Initialize Optimizely: Creates an instance of the Optimizely SDK using the Datafile.
- * 4. Experimentation Logic: Get a specific experiment result for this particular User ID.
+ * 4. Make Decisions: Get a specific decision result for this particular User ID.
  * 5. Result: Return the result to the caller via appending cookies to the callback function.
  */
 exports.handler = async (event, _context, callback) => {
@@ -67,16 +67,22 @@ exports.handler = async (event, _context, callback) => {
     const optimizelyClient = createInstance({
       datafile,
       logLevel: OptimizelyEnums.LOG_LEVEL.ERROR,
-      clientEnginer: AWS_LAMBDA_AT_EDGE_CLIENT_ENGINE,
+      clientEngine: AWS_LAMBDA_AT_EDGE_CLIENT_ENGINE,
       /**
        * You can add other Optimizely SDK initialization options here, such as a custom event dispatcher
        * for sending impression events to Optimizely LogX.
-       *
-       * Note: The event dispatcher below is a sample implementation of fire-and-forget event dispatching
+       */
+
+      /**
+       * Optional event dispatcher. Please uncomment the following line if you want to dispatch an impression event to optimizely logx backend.
+       * When enabled, an event is dispatched asynchronously. It does not impact the response time for a particular worker but it may
+       * add to the total compute time of the Lambda function and can impact AWS billing.
+       * 
+       * The event dispatcher attached below is a sample implementation of fire-and-forget event dispatching
        * in Lambda, however if your needs are more complex, you can implement your own event dispatcher
        * and integrate with Step Functions, SQS, or other services.
        */
-      dispatchEvent: dispatchEvent,
+      // eventDispatcher: dispatchEvent,
     });
 
     // 4. Experimentation Logic: Get a specific experiment result for this particular User ID.
