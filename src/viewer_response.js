@@ -5,7 +5,7 @@
  * This will capture the generated userId cookie and return it to the client.
  */
 
-import { getCookie, setHeaderCookie } from './cookies';
+import * as cookie from 'cookie';
 
 const COOKIE_NAME_OPTIMIZELY_USER_ID = 'OPTIMIZELY_USER_ID';
 
@@ -21,8 +21,10 @@ export function handler(event, _context, callback) {
     }
 
     let headers = {};
+    let cookies = {};
     try {
       headers = request.headers;
+      cookies = headers.cookie;
     } catch (error) {
       console.log(
         '[OPTIMIZELY] WARNING: Unable to get headers object from request object. This may be because the event is not a CloudFront event.'
@@ -38,13 +40,13 @@ export function handler(event, _context, callback) {
       );
     }
 
-    const userId = getCookie(headers, COOKIE_NAME_OPTIMIZELY_USER_ID);
+    const userId = cookies[COOKIE_NAME_OPTIMIZELY_USER_ID] || '';
 
     if (userId != null) {
-      response.headers = setHeaderCookie(
-        headers,
-        `${COOKIE_NAME_OPTIMIZELY_USER_ID}=${userId}`
-      );
+      response.headers = {
+        ...headers,
+        'Set-Cookie': cookie.serialize(COOKIE_NAME_OPTIMIZELY_USER_ID, userId),
+      };
       callback(null, response);
       return;
     }

@@ -2,7 +2,8 @@ import {
   createInstance,
   enums as OptimizelyEnums,
 } from '@optimizely/optimizely-sdk/dist/optimizely.lite.es';
-import { getCookie, setHeaderCookie } from './cookies';
+
+import * as cookie from 'cookie';
 
 import {
   dispatchEvent,
@@ -36,8 +37,10 @@ exports.handler = async (event, _context, callback) => {
   }
 
   let headers = {};
+  let cookies = {};
   try {
     headers = request.headers;
+    cookies = headers.cookie;
   } catch (error) {
     console.log(
       '[OPTIMIZELY] WARNING: Unable to get headers object from request object. This may be because the event is not a CloudFront event.'
@@ -47,14 +50,14 @@ exports.handler = async (event, _context, callback) => {
   try {
     // 1. User ID: Get the user ID from the cookie if it exists - otherwise generate a new user ID.
     console.log('[OPTIMIZELY] Getting user ID...');
-    let userId = getCookie(headers, COOKIE_NAME_OPTIMIZELY_USER_ID);
+    let userId = cookies[COOKIE_NAME_OPTIMIZELY_USER_ID] || '';
 
-    if (!userId) {
+    if (userId === '') {
       userId = generateRandomUserId();
-      headers = setHeaderCookie(
-        headers,
-        `${COOKIE_NAME_OPTIMIZELY_USER_ID}=${userId}`
-      );
+      headers = {
+        ...headers,
+        'Set-Cookie': cookie.serialize(COOKIE_NAME_OPTIMIZELY_USER_ID, userId),
+      };
     }
 
     console.log(`[OPTIMIZELY] Using User ID: ${userId}`);
@@ -77,7 +80,7 @@ exports.handler = async (event, _context, callback) => {
        * Optional event dispatcher. Please uncomment the following line if you want to dispatch an impression event to optimizely logx backend.
        * When enabled, an event is dispatched asynchronously. It does not impact the response time for a particular worker but it may
        * add to the total compute time of the Lambda function and can impact AWS billing.
-       * 
+       *
        * The event dispatcher attached below is a sample implementation of fire-and-forget event dispatching
        * in Lambda, however if your needs are more complex, you can implement your own event dispatcher
        * and integrate with Step Functions, SQS, or other services.
@@ -106,7 +109,8 @@ exports.handler = async (event, _context, callback) => {
     // === For a Single Flag ===  //
     const decision = optimizelyUserContext.decide('<YOUR_FLAG_HERE>'); // TODO: Replace with your flag name.
     console.log(
-      `[OPTIMIZELY] The Flag ${decision.flagKey} was ${decision.enabled ? 'Enabled' : 'Not Enabled'
+      `[OPTIMIZELY] The Flag ${decision.flagKey} was ${
+        decision.enabled ? 'Enabled' : 'Not Enabled'
       } for the user ${decision.userContext.getUserId()}`
     );
 
@@ -134,10 +138,10 @@ exports.handler = async (event, _context, callback) => {
     // 5. Result: Return the result to the caller via appending headers or cookies to the callback function.
 
     // 5a. Cookies
-    // headers = setHeaderCookie(
-    //   headers,
-    //   `${COOKIE_NAME_OPTIMIZELY_USER_ID}=${userId}`
-    // );
+    // headers = {
+    //   ...headers,
+    //   'Set-Cookie': cookie.serialize(COOKIE_NAME_OPTIMIZELY_USER_ID, userId)
+    // }
 
     // 5b. Headers
     // headers['<YOUR_FLAG_HERE>-decision'] = [

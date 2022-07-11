@@ -4,7 +4,7 @@ const https = require('https');
  * generateRandomUserId - Generates a random user ID.
  * 
  * Disclaimer: 
- * It is recommnded to replace this user ID generator with your own method for production purposes. 
+ * It is recommended to replace this user ID generator with your own method for production purposes. 
  * Feel free to use this function at your own discretion.
  * 
  * @returns string
@@ -87,7 +87,8 @@ let _datafileLastFetchedTime = 0; // Note last time the datafile was fetched.
 /**
  * getDatafile - Retrieves the datafile from the Optimizely CDN.
  * 
- * Note: This starter kit uses 
+ * Note: This starter kit uses in-memory caching per Lambda for data caching.
+ * Alternative considerations could include using CloudFront or AWS S3 for caching instead.
  * 
  * @param string sdkKey
  * @returns datafile JSON object
