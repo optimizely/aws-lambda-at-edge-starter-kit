@@ -85,7 +85,7 @@ exports.handler = async (event, _context, callback) => {
        * in Lambda, however if your needs are more complex, you can implement your own event dispatcher
        * and integrate with Step Functions, SQS, or other services.
        */
-      // eventDispatcher: dispatchEvent,
+      // eventDispatcher: { dispatchEvent },
     });
 
     // 4. Experimentation Logic: Get a specific experiment result for this particular User ID.
@@ -109,8 +109,7 @@ exports.handler = async (event, _context, callback) => {
     // === For a Single Flag ===  //
     const decision = optimizelyUserContext.decide('<YOUR_FLAG_HERE>'); // TODO: Replace with your flag name.
     console.log(
-      `[OPTIMIZELY] The Flag ${decision.flagKey} was ${
-        decision.enabled ? 'Enabled' : 'Not Enabled'
+      `[OPTIMIZELY] The Flag ${decision.flagKey} was ${decision.enabled ? 'Enabled' : 'Not Enabled'
       } for the user ${decision.userContext.getUserId()}`
     );
 
