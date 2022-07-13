@@ -1,0 +1,39 @@
+{
+  "name": "optimizely-aws-lambda-at-edge-starter-kit",
+  "version": "1.0.0",
+  "description": "Optimizely Starter Kit for running edge compute experiments on AWS Lambda@Edge.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "bigbuild": "rm -rf dist && rollup -c && cp -r node_modules dist/node_modules/ && cd dist && zip -r ./dist.zip .",
+    "build": "rm -rf dist && rollup -c && cd dist && zip -r dist.zip index.js && rm index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/optimizely/aws-lambda-edge-starter-kit.git"
+  },
+  "keywords": [
+    "lambda",
+    "edge",
+    "aws",
+    "optimizely",
+    "ab testing",
+    "decisions",
+    "feature flagging",
+    "experimentation"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@optimizely/optimizely-sdk": "^4.9.1",
+    "cookie": "^0.5.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^22.0.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "rollup": "^2.73.0",
+    "rollup-plugin-copy": "^3.4.0",
+    "rollup-plugin-terser": "^7.0.2"
+  }
+}
