@@ -6,17 +6,19 @@ You can deploy code behind feature flags, experiment with A/B tests, and roll ou
 
 ---
 
-# Optimizely + AWS Lambda@Edge Starter Kit
+## Optimizely + AWS Lambda@Edge Starter Kit
 
-> Starter Kit for running Optimizely experiments on AWS Lambda@Edge Functions using AWS Lambda and AWS Cloudfront.
+> Starter Kit for running Optimizely experiments on [AWS Lambda@Edge Functions](https://aws.amazon.com/lambda/edge/) using AWS Lambda and AWS Cloudfront.
 
-The Optimizely starter kit for AWS's Lambda@Edge embeds and extends our [Javascript SDK](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/javascript-node-sdk) to provide a starting point for you to implement experimentation and feature flagging for your experiences at the edge. For a guide to getting started with the Optimizely platform, you can reference our [Javascript Quickstart documentation](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/javascript-node-quickstart) alongside of this starter kit.
+The Optimizely starter kit for AWS's Lambda@Edge embeds and extends our [Javascript SDK](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/javascript-node-sdk) to provide a starting point for you to implement experimentation and feature flagging for your experiences at the edge. 
+
+For a guide to getting started with the Optimizely platform, you can reference our [Javascript Quickstart documentation](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/javascript-node-quickstart) alongside of this starter kit.
 
 Note: This starter kit in particular makes use of the "Lite" version of our Javascript SDK for Node.js.
 
-### **External Data Fetching & Caching**
+### External Data Fetching & Caching
 
-This starter kit uses standard ES7 async/await fetch methods to handle external data fetching. After fetching the Optimizely datafile, the datafile itself is cached as a JSON object in-memory. Large datafiles may cause this method presented in the starter kit to break - if you experience issues with large datafiles breaking in-memory Lambda caching, you can consider one of the alternative methods of caching with Lambda@Edge outlined in [this article here](https://aws.amazon.com/blogs/networking-and-content-delivery/leveraging-external-data-in-lambdaedge/).
+This starter kit uses standard ES7 async/await fetch methods to handle external data fetching. After fetching the Optimizely datafile, the datafile itself is cached as a JSON object in-memory. Large datafiles may cause this method presented in the starter kit to break - if you experience issues with large datafiles breaking in-memory Lambda caching, you can consider one of the alternative methods of caching with Lambda@Edge outlined in [this article](https://aws.amazon.com/blogs/networking-and-content-delivery/leveraging-external-data-in-lambdaedge/).
 
 Alternative methods to in-memory data caching include using a persistent connection to your datafile JSON, or caching via CloudFront.
 
@@ -24,24 +26,23 @@ For even faster data fetching, you can consider storing your datafile in an S3 b
 
 > Note: Additional caching mechanisms may be available through your CloudFront distribution's configuration.
 
-### **Identity Management**
+### Identity Management
 
-Out of the box, Optimizely's Full Stack SDKs require a user-provided identifier to be passed in at runtime to drive experiment and feature flag decisions. In case a user ID is not provided directly from the client, this starter kit generates a unique ID as a fallback, stores it into the cookie, and re-uses it to ensure decisions are sticky per user session. Alternatively, the client can provide a unique identifier itself by passing it in as a value for the `OPTIMIZELY_USER_ID` cookie.
+Out of the box, Optimizely's Full Stack SDKs require a user-provided identifier to be passed in at runtime to drive experiment and feature flag decisions. In case a user ID is not provided directly from the client, this starter kit generates a unique ID as a fallback, stores it into the cookie, and re-uses it to ensure decisions are sticky per user session. Alternatively, you can use an existing unique identifier available within your application and pass it in as the value for the `OPTIMIZELY_USER_ID` cookie.
 
-### **Bucketing**
+### Bucketing
+For more information on how Optimizely Full Stack SDKs assign users to feature flags and experiments, see [the documentation on how bucketing works](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/how-bucketing-works). 
 
-For more information on how Optimizely Full Stack SDKs bucket visitors, [click here](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/how-bucketing-works).
 
----
+## How to use
 
-# How to Use this Starter Kit
+### Prerequisites
+In order to use this starter kit, you should have:
 
-> **Pre-requisites:**
-> In order to use this starter kit, you should have:
->
-> - A basic AWS Lambda@Edge setup already configured. [For a tutorial on how to setup a basic AWS Lambda@Edge environment, click here.](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-edge-how-it-works-tutorial.html).
-> - An Optimizely account. [To sign up for an Optimizely account, click here.](https://www.optimizely.com/products/intelligence/full-stack-experimentation/)
+   - A basic AWS Lambda@Edge setup already configured. For a tutorial on how to setup a basic AWS Lambda@Edge environment, [click here](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-edge-how-it-works-tutorial.html).
+   - An Optimizely account. If you do not have an account, you can [register for a free account](https://www.optimizely.com/products/intelligence/full-stack-experimentation/).
 
+### Get started
 1. After your Lambda@Edge environment is prepared, clone this starter kit to your local development environment and run `npm install`.
 
 2. Navigate to `src/index.js` and update the `<YOUR_SDK_KEY_HERE>` and `<YOUR_FLAG_HERE>` values to the respective values from your Optimizely dashboard.
@@ -54,7 +55,7 @@ For more information on how Optimizely Full Stack SDKs bucket visitors, [click h
 
 5. Run `npm run build` - this uses Rollup to bundle the source code into a neat .zip file to be imported into Lambda.
 
-   > Note: Notice that a `/dist` folder is generated with the new dist.zip file - it should be roughly ~22kb in size assuming you've changed nothing else.
+   > Note: Notice that a `/dist` folder is generated with the new dist.zip file. It should be roughly ~22kb in size assuming you have not made any additional changes.
 
 6. Upload your function to AWS Lambda via GUI or CLI.
 
@@ -79,52 +80,18 @@ For more information on how Optimizely Full Stack SDKs bucket visitors, [click h
 
 9. Adjust your Lambda's configuration as needed. For example, you may need to increase your function's memory, storage, and timeout threshold to accommodate your function's needs.
 
-10. From here, how you'd like to use Optimizely's experimentation features is up to you! You can modify the cookies and headers based on experimentation results, add hooks to the "Origin Request" and "Origin Response" CloudFront triggers to do things like origin redirects or dynamic asset manipulation, or add more services to the pipeline including your own logging systems, databases, CDN origins, and more. Keep in mind that Lambda@Edge has some limitations - you can familiarize yourself with those by referencing this article - [Edge Functions Restrictions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/edge-functions-restrictions.html).
+10. From here, how you would like to use Optimizely's experimentation features is up to you. You can modify the cookies and headers based on experimentation results, add hooks to the "Origin Request" and "Origin Response" CloudFront triggers to do things like origin redirects or dynamic asset manipulation, or add more services to the pipeline including your own logging systems, databases, CDN origins, and more. Keep in mind that Lambda@Edge has some limitations - you can familiarize yourself with those by referencing this article - [Edge Functions Restrictions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/edge-functions-restrictions.html).
 
-If you have further questions, comments, concerns, or contributions, feel free to reach out via GitHub Issues!
 
----
+## Contributing
+If you have further questions, comments, concerns, or contributions, feel free to reach out via GitHub Issues! Please see [CONTRIBUTING](CONTRIBUTING.md).
 
-# Lambda@Edge
 
-### **Why use Lambda@Edge?**
+## Additional resources
 
-- **Speed**: Take advantage of CloudFront's reduction in latency by extending your compute location closer to your users.
-
-- **Cost**: Consolidate requests and remove transfer out fees from AWS origins.
-
-- **Security**: Improved security from DDOS attacks through AWS Standard Shield.
-
-### **Lambda@Edge Use Cases**
-
-With Lambda@Edge, you can build a variety of solutions, for example:
-
-- Inspect cookies to rewrite URLs to different versions of a site for experimentation.
-
-- Send different objects to your users based on the User-Agent header, which contains information about the device that submitted the request. For example, you can send images in different resolutions to users based on their devices.
-
-- Inspect headers or authorized tokens, inserting a corresponding header and allowing access control before forwarding a request to the origin.
-
-- Add, delete, and modify headers, and rewrite the URL path to direct users to different objects in the cache.
-
-- Generate new HTTP responses to do things like redirect unauthenticated users to login pages, or create and deliver static webpages right from the edge. For more information, see Using Lambda functions to generate HTTP responses to viewer and origin requests in the Amazon CloudFront Developer Guide.
-
-In this starter kit's case, we utilize Lambda@Edge to call to your Optimizely datafile and make decisions on whether feature flags are enabled or disabled based on an incoming user ID by checking the value of `OPTIMIZELY_USER_ID` from the cookies.
-
-### **Lambda@Edge Restrictions & Limitations**
-
-- There are some restrictions to using Lambda@Edge. Please read the [official documentation](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/edge-functions-restrictions.html) for the most up-to-date details.
-
-- As of July 2022, the maximum compressed size of a Lambda@Edge package can't exceed 50MB for origin events and 1MB for viewer events.
-
-### **Further Considerations**
-
-- For even greater performance gains, consider using [AWS CloudFront Functions](https://aws.amazon.com/blogs/aws/introducing-cloudfront-functions-run-your-code-at-the-edge-with-low-latency-at-any-scale/) and [AWS S3](https://aws.amazon.com/s3/) in tandem with AWS Lambda@Edge.
-
-### **Additional Resources**
-
-- [Lambda - Lambda@Edge Docs](https://docs.aws.amazon.com/lambda/latest/dg/lambda-edge.html)
-- [CloudFront - Lambda@Edge Docs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-at-the-edge.html)
+- [Lambda - Lambda@Edge offical documentation](https://docs.aws.amazon.com/lambda/latest/dg/lambda-edge.html)
+- [CloudFront - Lambda@Edge documentation](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-at-the-edge.html)
 - [CloudFront - Lambda@Edge Get Started](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-edge-how-it-works.html)
 - [Example Lambda Functions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-examples.html)
 - [Article: Lambda@Edge Gotchas and Tips](https://medium.com/@mnylen/lambda-edge-gotchas-and-tips-93083f8b4152)
+- [AWS Lambda@Edge with Optimizely documentation](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/lambda)
