@@ -37,10 +37,10 @@ For more information on how Optimizely Full Stack SDKs assign users to feature f
 ## How to use
 
 ### Prerequisites
-In order to use this starter kit, you should have:
+You will need to complete the following prerequisites to use this template:
 
-   - A basic AWS Lambda@Edge setup already configured. For a tutorial on how to setup a basic AWS Lambda@Edge environment, [click here](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-edge-how-it-works-tutorial.html).
-   - An Optimizely account. If you do not have an account, you can [register for a free account](https://www.optimizely.com/products/intelligence/full-stack-experimentation/).
+   - Set up and configure AWS Lambda@Edge. For a tutorial on how to setup a basic AWS Lambda@Edge environment, [click here](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-edge-how-it-works-tutorial.html).
+   - Have an Optimizely account. If you do not have an account, you can [register for a free account](https://www.optimizely.com/products/intelligence/full-stack-experimentation/).
 
 ### Get started
 1. After your Lambda@Edge environment is prepared, clone this starter kit to your local development environment and run `npm install`.
