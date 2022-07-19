@@ -18,9 +18,9 @@ Note: This starter kit in particular makes use of the "Lite" version of our Java
 
 ### External Data Fetching & Caching
 
-This starter kit uses standard ES7 async/await fetch methods to handle external data fetching. After fetching the Optimizely datafile, the datafile itself is cached as a JSON object in-memory. Large datafiles may cause this method presented in the starter kit to break - if you experience issues with large datafiles breaking in-memory Lambda caching, you can consider one of the alternative methods of caching with Lambda@Edge outlined in [this article](https://aws.amazon.com/blogs/networking-and-content-delivery/leveraging-external-data-in-lambdaedge/).
+This starter kit uses standard ES7 async/await fetch methods to handle external data fetching. After fetching the Optimizely datafile, the datafile itself is cached as a JSON object in-memory. Large datafiles may cause this method presented in the starter kit to break. If you experience issues with large datafiles breaking in-memory Lambda caching, you can consider one of the alternative methods of caching with Lambda@Edge outlined in [this article](https://aws.amazon.com/blogs/networking-and-content-delivery/leveraging-external-data-in-lambdaedge/).
 
-Alternative methods to in-memory data caching include using a persistent connection to your datafile JSON, or caching via CloudFront.
+Alternative methods to in-memory data caching include using a persistent connection to your datafile JSON or caching via CloudFront.
 
 For even faster data fetching, you can consider storing your datafile in an S3 bucket that you own and refactor the datafile fetching mechanism to use Lambda's built-in AWS SDK library and fetch from your S3 bucket instead.
 
@@ -28,7 +28,7 @@ For even faster data fetching, you can consider storing your datafile in an S3 b
 
 ### Identity Management
 
-Out of the box, Optimizely's Full Stack SDKs require a user-provided identifier to be passed in at runtime to drive experiment and feature flag decisions. In case a user ID is not provided directly from the client, this starter kit generates a unique ID as a fallback, stores it into the cookie, and re-uses it to ensure decisions are sticky per user session. Alternatively, you can use an existing unique identifier available within your application and pass it in as the value for the `OPTIMIZELY_USER_ID` cookie.
+Out of the box, Optimizely's Full Stack SDKs require a user-provided identifier to be passed in at runtime to drive experiment and feature flag decisions. In case a user ID is not provided directly from the client, this starter kit generates a unique ID as a fallback, stores it into the cookie and re-uses it to ensure decisions are sticky per user session. Alternatively, you can use an existing unique identifier available within your application and pass it in as the value for the `OPTIMIZELY_USER_ID` cookie.
 
 ### Bucketing
 For more information on how Optimizely Full Stack SDKs assign users to feature flags and experiments, see [the documentation on how bucketing works](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/how-bucketing-works). 
@@ -65,7 +65,7 @@ In order to use this starter kit, you should have:
    >
    > **Lambda Layers**: If you need additional libraries, custom runtimes, or configuration files to use alongside your Lambda function, consider looking into utilizing [Lambda Layers](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html).
 
-7. After your Lambda Function is set up, ensure that you have provisioned it with Lambda@Edge permissions and associate it with your CloudFront distribution. Set the CloudFront trigger for this function to be "Viewer Request".
+7. After your Lambda Function is set up, provision it with Lambda@Edge permissions and associate it with your CloudFront distribution. Set the CloudFront trigger for this function to be "Viewer Request".
 
    > Note: CloudFront triggers are associated with only one specific version of your Lambda function. Remember to update the CloudFront trigger assignment as needed when pushing new versions of your Lambda function. You may, for example, need to have one function that handles receiving viewer requests (viewer request trigger) and one function that handles returning a response to the viewer (viewer response trigger).
 
@@ -78,9 +78,9 @@ In order to use this starter kit, you should have:
    > 1. A slightly altered version of `index.js` - `viewer_request.js`, which is a file that outlines how to return a `request` object instead of a `response` object. You can refer to this file when designing functions that only adjust the request to your origin rather than return a response.
    > 2. `viewer_response.js`, which is a file that reads the cookie from the request headers and includes them in the return response. You can refer to this file when accommodating for retrieving a user ID generated from the viewer request hook and re-using it in the viewer response hook.
 
-9. Adjust your Lambda's configuration as needed. For example, you may need to increase your function's memory, storage, and timeout threshold to accommodate your function's needs.
+9. Adjust your Lambda's configuration as needed. For example, you may need to increase your function's memory, storage and timeout threshold to accommodate your function's needs.
 
-10. From here, how you would like to use Optimizely's experimentation features is up to you. You can modify the cookies and headers based on experimentation results, add hooks to the "Origin Request" and "Origin Response" CloudFront triggers to do things like origin redirects or dynamic asset manipulation, or add more services to the pipeline including your own logging systems, databases, CDN origins, and more. Keep in mind that Lambda@Edge has some limitations - you can familiarize yourself with those by referencing this article - [Edge Functions Restrictions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/edge-functions-restrictions.html).
+10. From here, you can use Optimizely's experimentation features as desired. You can modify the cookies and headers based on experimentation results, add hooks to the "Origin Request" and "Origin Response" CloudFront triggers to do things like origin redirects or dynamic asset manipulation, or add more services to the pipeline including your own logging systems, databases, CDN origins and more. Keep in mind that Lambda@Edge has some limitations - you can familiarize yourself with those by referencing this article - [Edge Functions Restrictions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/edge-functions-restrictions.html).
 
 
 ## Contributing
