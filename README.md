@@ -10,9 +10,7 @@ You can deploy code behind feature flags, experiment with A/B tests, and roll ou
 
 > Starter Kit for running Optimizely experiments on [AWS Lambda@Edge Functions](https://aws.amazon.com/lambda/edge/) using AWS Lambda and AWS Cloudfront.
 
-The Optimizely starter kit for AWS's Lambda@Edge embeds and extends our [Javascript SDK](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/javascript-node-sdk) to provide a starting point for you to implement experimentation and feature flagging for your experiences at the edge. 
-
-For a guide to getting started with the Optimizely platform, you can reference our [Javascript Quickstart documentation](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/javascript-node-quickstart) alongside of this starter kit.
+The Optimizely starter kit for AWS's Lambda@Edge embeds and extends our [Javascript SDK](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/javascript-node-sdk) to provide a starting point for you to implement experimentation and feature flagging for your experiences at the edge. For a guide to getting started with our platform more generally, this can be combined with the steps outlined in our [Javascript Quickstart](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/javascript-node-quickstart).
 
 Note: This starter kit in particular makes use of the "Lite" version of our Javascript SDK for Node.js.
 
