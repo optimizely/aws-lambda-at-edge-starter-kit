@@ -92,4 +92,4 @@ If you have further questions, comments, concerns, or contributions, feel free t
 - [CloudFront - Lambda@Edge Get Started](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-edge-how-it-works.html)
 - [Example Lambda Functions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-examples.html)
 - [Article: Lambda@Edge Gotchas and Tips](https://medium.com/@mnylen/lambda-edge-gotchas-and-tips-93083f8b4152)
-- [AWS Lambda@Edge with Optimizely documentation](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/lambda)
+- [AWS Lambda@Edge with Optimizely documentation](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/aws-lambda-at-edge)
