@@ -8,7 +8,7 @@ Optimizely Rollouts is [free feature flags](https://www.optimizely.com/free-feat
 
 ## Get Started
 
-Refer to the [Optimizely AWS Lambda@Edge Starter Kit documentation page](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/aws-lambda-at-edge) for detailed instructions about using this starter kit.
+Refer to the [Optimizely AWS Lambda@Edge Starter Kit documentation](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/aws-lambda-at-edge) for detailed instructions about using this starter kit.
 
 ### Prerequisites
 
@@ -40,7 +40,7 @@ The Optimizely starter kit for Akamai's EdgeWorkers embeds and extends our [Java
 
 > Note: This starter kit in particular makes use of the "Lite" version of our Javascript SDK for Node.js which explicitly excludes the datafile manager and event processor features for better performance. As a result, it is expected that you will provide the datafile manually to the Optimizely SDK either through a local file reference or by using the provided platform-specific `getDatafile()` helper to load in your Optimizely project's datafile.
 
-### Initializing and Using Optimizely
+### Initialization
 
 Sample code is included in `src/index.js` that shows examples of initializing and using the Optimizely JavaScript (Node) SDK interface for performing common functions such as creating user context, adding a notification listener, and making a decision based on the created user context.
 
@@ -116,8 +116,11 @@ For more information about AWS Lambda@Edge, you may visit the following resource
 - [Article: Lambda@Edge Gotchas and Tips](https://medium.com/@mnylen/lambda-edge-gotchas-and-tips-93083f8b4152)
 - [Optimizely AWS Lambda@Edge Starter Kit Documentation](https://docs.developers.optimizely.com/experimentation/v4.0.0-full-stack/docs/aws-lambda-at-edge)
 
-## Contributing
-If you have further questions, comments, concerns, or contributions, feel free to reach out via GitHub Issues! Please see [CONTRIBUTING](CONTRIBUTING.md).
+## SDK Development
+
+### Contributing
+
+Please see [CONTRIBUTING](CONTRIBUTING.md).
 
 ### Other Optimizely SDKs
 
@@ -148,8 +151,6 @@ If you have further questions, comments, concerns, or contributions, feel free t
 ### Other Optimizely Edge Starter Kits
 
 - Akamai EdgeWorkers - https://github.com/optimizely/akamai-edgeworker-starter-kit
-
-- AWS Lambda@Edge - https://github.com/optimizely/aws-lambda-at-edge-starter-kit
 
 - Cloudflare Workers - https://github.com/optimizely/cloudflare-worker-template
 
